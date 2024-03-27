@@ -4,7 +4,9 @@ import jwt from 'jsonwebtoken'
 export default function checkToken(req, res, next) { 
     //bypass login, register
      if(
-      req.url.toLowerCase().startsWith('/login')
+      req.url.toLowerCase().startsWith('/login') ||
+      req.url.toLowerCase().startsWith('/success')
+
         ) {
             next()
         return

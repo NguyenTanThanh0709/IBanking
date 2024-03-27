@@ -30,9 +30,9 @@ export default function TuitionItem({ tuition, transaction }) {
                       <td class="border p-2">{item.fee.toLocaleString()}</td>
                       <td class="border p-2 text-rose-500 fw-bold">0</td>
                       <td class="border p-2 text-rose-500 fw-bold">{item.fee.toLocaleString()}</td>
-                      <td class="border p-2 text-rose-500 fw-bold">0</td>
-                      <td class="border p-2 text-rose-500 fw-bold">{item.fee.toLocaleString()}</td>
-                      <td class="border p-2 text-rose-500 fw-bold"></td>
+                      <td class="border p-2 text-rose-500 fw-bold">{item.status ? item.fee.toLocaleString(): 0}</td>
+                      <td class="border p-2 text-rose-500 fw-bold">{item.status ? 0 : item.fee.toLocaleString()}</td>
+                      <td class="border p-2 text-rose-500 fw-bold">{item.status ? "Đã thanh toán" : "còn nợ"}</td>
                     </tr>
                   ))
                 ) : (
@@ -69,18 +69,29 @@ export default function TuitionItem({ tuition, transaction }) {
         <th class="border p-2">Học kỳ<br /></th>
         <th class="border p-2">Số tiền<br />(Amount)</th>
         <th class="border p-2">Hình thức thanh toán<br />(Method of payment)</th>
+        <th class="border p-2">Người thực hiện thanh toán<br />(MSSV)</th>
       </tr>
     </thead>
     <tbody>
 
-    {transaction.map((item, index) => (
-      <tr key={index}>
-        <td class="border p-2">{item.payment_date}</td>
-        <td class="border p-2">{item.tuition.start} -  {item.tuition.end}</td>
-        <td class="border p-2">{item.tuition.fee}</td>
-        <td class="border p-2">{item.method}</td>
-      </tr>
-    ))}
+      
+
+    {listHistoryTransactions ? (
+  transaction.map((item, index) => (
+    <tr key={index}>
+      <td class="border p-2">{item.payment_date}</td>
+      <td class="border p-2">{item.tuition.start} -  {item.tuition.end}</td>
+      <td class="border p-2">{item.tuition.fee}</td>
+      <td class="border p-2">{item.method}</td>
+      <td class="border p-2">{item.userSender.name} - {item.userSender.mssv}</td>
+    </tr>
+  ))
+) : (
+  <tr>
+    <td colspan="5" class="border p-2 text-center">No transaction history available</td>
+  </tr>
+)}
+
 
     </tbody>
   </table>

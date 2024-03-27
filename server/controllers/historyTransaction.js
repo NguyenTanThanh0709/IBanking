@@ -3,7 +3,7 @@ import TuitionModel from '../models/TuitionModel.js';
 // Controller để tạo một giao dịch mới
 export const createTransaction = async (req, res) => {
     try {
-        const {tuitionId,userId, status1, method } = req.body;
+        const {tuitionId,userId,userIdsender, status1, method } = req.body;
         // Lấy ngày hiện tại và chuyển đổi thành chuỗi ngày tháng
         const payment_date = new Date().toISOString();
 
@@ -12,6 +12,7 @@ export const createTransaction = async (req, res) => {
             payment_date,
             tuition: tuitionId,
             user: userId,
+            userSender: userIdsender,
             status1,
             method
         });
@@ -29,12 +30,12 @@ export const createTransaction = async (req, res) => {
 export const updateTransactionByTuitionId = async (req, res) => {
     try {
         const tuitionId = req.params.tuitionId;
-        const {  userId,status1, method } = req.body;
+        const {  userId,userIdsender,status1, method } = req.body;
         const payment_date = new Date().toISOString();
-        console.log(tuitionId,userId,status1,method)
+        // console.log(tuitionId,userId,status1,method)
         const updatedTuition = await TuitionModel.findByIdAndUpdate(
             tuitionId,
-            { status: true }, // Specify the field you want to update and its new value
+            { status: status1 }, // Specify the field you want to update and its new value
             { new: true }
         );
         console.log(updatedTuition)
@@ -44,7 +45,8 @@ export const updateTransactionByTuitionId = async (req, res) => {
                 payment_date,
                 tuition: tuitionId,
                 user: userId,
-                status: true, // Assuming status1 is meant to be the value of the 'status' field
+                userSender: userIdsender,
+                status: status1, // Assuming status1 is meant to be the value of the 'status' field
                 method
             });
             const savedTransaction = await history.save();
@@ -71,6 +73,9 @@ export const getTransactionsByUser = async (req, res) => {
           })
           .populate({
             path: 'user',
+          })
+          .populate({
+            path: 'userSender',
           });
 
         res.status(200).json(transactions);

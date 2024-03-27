@@ -38,10 +38,9 @@ export default function TuitionPage() {
 
   const [listHistoryTransactions, setListHistoryTransactions] = useState([]);
 
-  const getListHistoryTransactions = async () => {
+  const getListHistoryTransactions = async (id) => {
     try {
-      console.log(loginState.data._id)
-      const response = await API.fetchGetHistoryTransactionByUser(loginState.data._id);
+      const response = await API.fetchGetHistoryTransactionByUser(id);
       setListHistoryTransactions(response);
     } catch (error) {
       console.log(error)
@@ -53,11 +52,7 @@ export default function TuitionPage() {
   };
 
   const handleConfirmClick = async () => {
-    // console.log(mssv)
     fetchData(mssv);
-    setDateRanges(generateDateRanges(userTuitions[0].user.start, userTuitions[0].user.end));
-    // setUserTuition([])
-     
   };
 
   // console.log(userTuition)
@@ -98,8 +93,8 @@ export default function TuitionPage() {
     try {
       const data = await API.fetchTuitionWithToken(id);
       setUserTuitions(data);
-      // console.log(data)
       setUserTuition([data[0]])
+      setDateRanges(generateDateRanges(data[0].user.start, data[0].user.end));
     } catch (error) {
     }
   };
@@ -113,12 +108,14 @@ export default function TuitionPage() {
       dispatch(login.set(data));
       const tuitionId = data.mssv;
       fetchData(tuitionId);
+      getListHistoryTransactions(data._id);
       const startYear = data.start;
       const endYear = data.end;
       setDateRanges(generateDateRanges(startYear, endYear));
     }else if(loginState.isAuthenticated === 1){
       const tuitionId = loginState.data.mssv;
       fetchData(tuitionId);
+      getListHistoryTransactions(loginState.data._id);
       const startYear = loginState.data.start;
       const endYear = loginState.data.end;
       setDateRanges(generateDateRanges(startYear, endYear));
@@ -129,12 +126,20 @@ export default function TuitionPage() {
     
   }, []);
 
+ 
+
   useEffect(() => {
+    if(radioValue === "1" && loginState.isAuthenticated === 1){
+      const tuitionId = loginState.data.mssv;
+      fetchData(tuitionId);
+      const startYear = loginState.data.start;
+      const endYear = loginState.data.end;
+      setDateRanges(generateDateRanges(startYear, endYear));
+    }
+    }, [radioValue]);
 
-  getListHistoryTransactions();
-    
-  }, [loginState]);
 
+  console.log(userTuition)
 
   return (
     <Container fluid={true}>

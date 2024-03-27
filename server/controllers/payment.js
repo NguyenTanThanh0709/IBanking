@@ -20,36 +20,49 @@ const createPayment = async (req, res) => {
     let vnpUrl = config.get('vnp_Url');
     let returnUrl = config.get('vnp_ReturnUrl');
     let orderId = moment(date).format('DDHHmmss');
+
     let amount = req.body.amount;
     let bankCode = req.body.bankCode;
+
+
+    // của người học phí
     let mssv = req.body.mssv;
-    let _id = req.body.id;
-    let mssv1 = req.body.mssv1;
-    let email = req.body.email;
-    let idTuition = req.body.idTuition;
     let idUser = req.body.idUser;
-    
+    let idTuition = req.body.idTuition;
+    let email = req.body.email;
+
+
+    let mssv1 = req.body.mssv1;
+    let idsender = req.body.idsender;
+
+    let start = req.body.start;
+    let end = req.body.end;
+
     let locale = req.body.language;
     if(locale === null || locale === ''){
         locale = 'vn';
     }
     let currCode = 'VND';
+    
+    
+    
     let vnp_Params = {};
+    if(bankCode !== null && bankCode !== ''){
+        vnp_Params['vnp_BankCode'] = bankCode;
+    }
+    vnp_Params['vnp_OrderInfo'] = 'Thanh toan cho ma GD:' + orderId + "_" + mssv + "_" + idUser + "_" + idTuition + "_" + email + "_" + mssv1 + "_"+ idsender + "_" + start + "_" + end;
     vnp_Params['vnp_Version'] = '2.1.0';
     vnp_Params['vnp_Command'] = 'pay';
     vnp_Params['vnp_TmnCode'] = tmnCode;
     vnp_Params['vnp_Locale'] = locale;
     vnp_Params['vnp_CurrCode'] = currCode;
     vnp_Params['vnp_TxnRef'] = orderId;
-    vnp_Params['vnp_OrderInfo'] = 'Thanh toan cho ma GD:' + orderId + "_" + mssv + "_" + _id + "_" + mssv1 + "_" + email + "_" + idTuition + "_" + idUser;
     vnp_Params['vnp_OrderType'] = 'other';
     vnp_Params['vnp_Amount'] = amount * 100;
     vnp_Params['vnp_ReturnUrl'] = returnUrl;
     vnp_Params['vnp_IpAddr'] = ipAddr;
     vnp_Params['vnp_CreateDate'] = createDate;
-    if(bankCode !== null && bankCode !== ''){
-        vnp_Params['vnp_BankCode'] = bankCode;
-    }
+    
 
     vnp_Params = sortObject(vnp_Params);
 

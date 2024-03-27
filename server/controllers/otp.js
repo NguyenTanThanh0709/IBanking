@@ -30,7 +30,7 @@ const sendEmailCreateOrder = async (email, otp) => {
 
 
 const sendEmailCreateOrderSuccess = async (req, res) => {
-    const { email, money, description } = req.body;
+    const { mssv,start,end,money,result,email } = req.body;
     let transporter = nodemailer.createTransport({
         host: "smtp.gmail.com",
         service: 'gmail', 
@@ -48,8 +48,21 @@ const sendEmailCreateOrderSuccess = async (req, res) => {
             from: process.env.MAIL_ACCOUNT,
             to: email,
             subject: "THÔNG BÁO THANH TOÁN HỌC PHÍ", 
-            text: "THÔNG BÁO THANH TOÁN HỌC PHÍ. VỚI SỐ TIỀN: " + money  + "TRẠNG THÁI : "+  description,
-            html: `<div><b>Thanh toán học phí</b></div> <div>message: ${description}</div> với số tiền : ${money} VNĐ`,
+            html: `
+                <div>
+                Gửi kết quả thanh toán học phí của sinh viên với MSSV: ${mssv}.
+                </div>
+                <div>
+                Kết Quả Thanh toán Học phí học kỳ  ${start}-${end} với học phí ${money} VNĐ.
+                </div>
+                <div>
+                Kết Quả: ${result}.
+                </div>
+                <div>
+                kính chúc bạn có một ngày tốt lành.
+                </div>
+
+            `,
         });
         console.log("Email sent: " + info.response);
         res.send(true); // Gửi true nếu gửi email thành công

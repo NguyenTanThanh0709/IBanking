@@ -13,7 +13,7 @@ const LoginPage = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const loginState = useSelector(state => state.login);
-  const [inputUsername, setInputUsername] = useState("123456789");
+  const [inputUsername, setInputUsername] = useState("52100841");
   const [inputPassword, setInputPassword] = useState("hashedPassword123");
   const [show, setShow] = useState(false);
   const [loading, setLoading] = useState(false);

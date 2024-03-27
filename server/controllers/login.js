@@ -16,7 +16,7 @@ const addNewUser = async (req, res) => {
                 end: year + 1,
                 fee: Math.floor(Math.random() * (20000000 - 5000000 + 1)) + 5000000, // Random fee between 5,000,000 and 20,000,000
                 status: false,
-                user: savedUser.mssv,
+                user: savedUser._id,
             };
             tuitions.push(tuition);
         }

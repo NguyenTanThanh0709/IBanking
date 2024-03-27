@@ -11,16 +11,9 @@ import OtpInput from '../Card/OtpInput'
 export default function CodeTuitionItem(props) {
   const loginState = useSelector(state => state.login);
   const data = props.data;
-  
-  // console.log(data)
   const tuitionDataExists = data && data.length > 0;
-    const [userTuition, setUserTuition] = useState({});
-    // console.log(data[0].status)
-    
 
-    const [name, setName] = useState('');
-    const [mssv, setMssv] = useState('');
-    const [money, setMoney] = useState(0);
+
 
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
@@ -39,12 +32,6 @@ export default function CodeTuitionItem(props) {
     });
   }
   
-  const handleClickremoveUser = () =>{
-    socket.emit("removeUser", data[0].user.mssv);
-    socket.on("removeUsers", (users) => {
-      console.log(users)
-    });
-  }
 
   const checkUser = (userId) => {
     return new Promise((resolve, reject) => {
@@ -62,20 +49,16 @@ export default function CodeTuitionItem(props) {
         setUsername(loginState.data.name);
         setSdt(loginState.data.phoneNumber);
     }
-   
-
 }, [])
 
-  useEffect(() => {
-    setUserTuition(data); // Update userTuition when data changes
-  }, [data]);
 
   
   const [showOtpInput, setShowOtpInput] = useState(false);
+  const [showOtpInput_, setShowOtpInput_] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState();
+
   const openOTP = async () => {
-    setFormData(true)
+   
     let data_ = { email: data[0].user.email }
     console.log(  data_)
     try {
@@ -91,12 +74,34 @@ export default function CodeTuitionItem(props) {
     } catch (error) {
       alert("Mã OTP không thể gửi đến email của bạn")
       
-    }
-
-   
+    }   
   }
+
+  const openOTP_ = async () => {
+   
+    let data_ = { email: data[0].user.email }
+    console.log(  data_)
+    try {
+      let data1 = await API.fetchOtpWithToken(data_);
+      console.log(data1)
+    if(data1){
+      alert("Mã OTP đã được gửi đến email của bạn")
+      setShowOtpInput_(true);
+      startCountdown();
+    }else{
+      alert("Mã OTP không thể gửi đến email của bạn")
+    }
+    } catch (error) {
+      alert("Mã OTP không thể gửi đến email của bạn")
+      
+    }   
+  }
+
   const offOTP = () => {
     setShowOtpInput(false);
+  }
+  const offOTP_ = () => {
+    setShowOtpInput_(false);
   }
   const onOtpSubmit = async (otp) => {
     let data = { hashOtp: otp }
@@ -108,7 +113,11 @@ export default function CodeTuitionItem(props) {
     if(data1){
       alert("Tiến Hành Thanh Toán")
       // setShowOtpInput(true);
-      handlePayment();
+      if(showOtpInput){
+        handlePayment();
+      }else if(showOtpInput_){
+        PayPak();
+      }
     }else{
       alert("OTP LỖI")
     }
@@ -121,7 +130,6 @@ export default function CodeTuitionItem(props) {
 
 const [seconds, setSeconds] = useState(60);
 const [isRunning, setIsRunning] = useState(false);
-
   useEffect(() => {
     let intervalId;
     if (isRunning) {
@@ -134,7 +142,6 @@ const [isRunning, setIsRunning] = useState(false);
 
     return () => clearInterval(intervalId);
   }, [seconds, isRunning]);
-
   const startCountdown = () => {
     setSeconds(60);
     setIsRunning(true);
@@ -146,8 +153,6 @@ const [isRunning, setIsRunning] = useState(false);
     const userExists = await checkUser(data[0].user.mssv);
     const userExists_ = await checkUser(loginState.data.mssv);
 
-    console.log(data[0])
-    console.log(userExists, userExists_, 1)
     if(!userExists && !userExists_){
       handleClickaddUser();
       try {
@@ -155,7 +160,24 @@ const [isRunning, setIsRunning] = useState(false);
         const token = loginState.data.token;
           const response = await fetch('http://localhost:5001/api/orders/create_payment_url', {
               method: 'POST',
-              body: JSON.stringify({ amount: data[0].fee, bankCode: 'VNBANK', language: 'vn',idUser:data[0].user._id, idTuition:data[0]._id,email: data[0].user.email, mssv:data[0].user.mssv, id:data[0]._id, mss1: loginState.data.mssv }),
+              body: JSON.stringify({ 
+                amount: data[0].fee, 
+                bankCode: 'VNBANK', 
+                language: 'vn',
+
+                idUser: data[0].user._id,  // id của người học phí
+                idTuition: data[0]._id,    // mã học phí
+                email: data[0].user.email, // email của người học phí
+                mssv: data[0].user.mssv,  // mssv của người học phí
+
+                idsender: loginState.data._id, 
+                mss1: loginState.data.mssv // người thực hiện thanh toán 
+
+                ,start : data[0].start
+                ,end : data[0].end,
+
+            }),
+            
               headers: {
                   'Content-Type': 'application/json',
                   'Authorization': `Bearer ${token}`
@@ -206,9 +228,30 @@ const [isRunning, setIsRunning] = useState(false);
   }, [])
 
   const PayPak = async() => {
-    const datapaypal = { amount: data[0].fee, bankCode: 'PAYPAL', language: 'vn',idUser:data[0].user._id, idTuition:data[0]._id,email: data[0].user.email, mssv:data[0].user.mssv, id:data[0]._id, mss1: loginState.data.mssv }
+    const datapaypal = { 
+                amount: data[0].fee, 
+                bankCode: 'VNBANK', 
+                language: 'vn',
+
+                idUser: data[0].user._id,  // id của người học phí
+                idTuition: data[0]._id,    // mã học phí
+                email: data[0].user.email, // email của người học phí
+                mssv: data[0].user.mssv,  // mssv của người học phí
+
+                idsender: loginState.data._id, 
+                mss1: loginState.data.mssv // người thực hiện thanh toán 
+
+                ,start : data[0].start
+                ,end : data[0].end,
+    }
     // console.log(datapaypal)
     const token = localStorage.getItem('token');
+
+    const userExists = await checkUser(data[0].user.mssv);
+    const userExists_ = await checkUser(loginState.data.mssv);
+
+    if(!userExists && !userExists_){
+      handleClickaddUser();
 
     try {
       const response = await fetch('http://localhost:5001/pay', {
@@ -230,6 +273,8 @@ const [isRunning, setIsRunning] = useState(false);
   } catch (error) {
       console.error('Error while fetching data:', error);
   }
+    }
+
   }
 
   return (
@@ -426,6 +471,9 @@ const [isRunning, setIsRunning] = useState(false);
                 {/* <div>...Loading</div> */}
 
             )}
+
+
+
                 {!showOtpInput ? (
                   <Button variant="danger" className='mt-2' onClick={() => openOTP()}>Thanh Toán VNPAY</Button>
             ) : (
@@ -439,9 +487,23 @@ const [isRunning, setIsRunning] = useState(false);
                 </div>
             )}
                 <div>OR</div>
-                {
-                  <Button variant="danger" className='mt-2' onClick={() => PayPak()}>Thanh Toán PayPal</Button>
-                  
+                {!showOtpInput_ ? (<><Button variant="danger" className='mt-2' onClick={() => openOTP_()}>Thanh Toán PayPal</Button></>) :
+                
+                (
+
+                  <div>
+                    <p>Enter OTP sent to {email}</p>
+                    <h1>{seconds} seconds left</h1>
+                    <OtpInput length={6}
+                        onOtpSubmit={onOtpSubmit} />
+                    {/* <Button variant="danger" className='mt-2 mx-2' onClick={() => handlePayment()}>Thanh Toán</Button> */}
+                    <Button variant="success" className='mt-2' onClick={() => offOTP_()}>Quay Lại</Button>
+                </div>
+                )
+                  // <Button variant="danger" className='mt-2' onClick={() => PayPak()}>Thanh Toán PayPal</Button>
+                
+
+                 
                 }
                   </>)
                 }

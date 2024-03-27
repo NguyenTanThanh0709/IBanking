@@ -16,7 +16,11 @@ export default mongoose.model('TransactionHistoryModel',
             ref: 'UserModel', // Replace with the actual name of your Tenant model
             required: true,
         },
-
+        userSender: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'UserModel', // Replace with the actual name of your Tenant model
+            required: true,
+        },
         status: {
             type: Boolean,
             required: true

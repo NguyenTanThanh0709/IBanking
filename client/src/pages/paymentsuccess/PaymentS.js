@@ -12,15 +12,20 @@ function PaymentS() {
     const vnp_TransactionStatus = searchParams.get('vnp_TransactionStatus');
 
     const mssv = searchParams.get('vnp_OrderInfo').split("_")[1];
-    const _id = searchParams.get('vnp_OrderInfo').split("_")[2];
-    const mssv1 = searchParams.get('vnp_OrderInfo').split("_")[3];
+    const idUser = searchParams.get('vnp_OrderInfo').split("_")[2];
+    const idTuition = searchParams.get('vnp_OrderInfo').split("_")[3];
     const email = searchParams.get('vnp_OrderInfo').split("_")[4];
-    const idTuition = searchParams.get('vnp_OrderInfo').split("_")[5];
-    const iduidUser = searchParams.get('vnp_OrderInfo').split("_")[6];
+
+    const mssv1 = searchParams.get('vnp_OrderInfo').split("_")[5];
+    const idsender = searchParams.get('vnp_OrderInfo').split("_")[6];
+
+    const start = searchParams.get('vnp_OrderInfo').split("_")[7];
+    const end = searchParams.get('vnp_OrderInfo').split("_")[8];
+
+
+
 
     const money = searchParams.get('vnp_Amount') / 100;
-    const description = "Thanh toán Thành Công Học Phí";
-
 
     console.log(mssv)
 
@@ -28,14 +33,6 @@ function PaymentS() {
     const [showSuccessIcon, setShowSuccessIcon] = useState(false);
     const [showFailedIcon, setShowFailedIcon] = useState(false);
 
-    const fetchUpdate = async () => {
-      try {
-        const response = await API.updateTuitionStatusById(_id, { status: true });
-        console.log(response)
-      } catch (error) {
-        console.log(error)
-      }
-    }
 
     useEffect(() => {
       // Kiểm tra vnp_ResponseCode và vnp_TransactionStatus để quyết định hiển thị biểu tượng tương ứng
@@ -66,24 +63,37 @@ function PaymentS() {
     // Hàm xử lý khi nút "GO BACK" được nhấp
     if(vnp_ResponseCode === '00' && vnp_TransactionStatus === '00') {
       // xử lý data base thanh toán thành công ngày giờ
+      updateTution();
+      let mailSuccess = {
+        mssv: mssv,
+        start: start,
+        end: end,
+        money: money,
+        result: "THÀNH CÔNG",
+        email: email,
+      }
+      sendEmailCreateOrderSuccess(mailSuccess);
+    }else{
+      let mailSuccess = {
+        mssv: mssv,
+        start: start,
+        end: end,
+        money: money,
+        result: "THẤT BẠI",
+        email: email,
+      }
+      sendEmailCreateOrderSuccess(mailSuccess);
+      
     }
     handleClickremoveUser();
-    fetchUpdate();
-    let mailSuccess = {
-      email: email,
-      money: money,
-      description: description,
-    }
-    console.log(mailSuccess)
-    sendEmailCreateOrderSuccess(mailSuccess);
-    updateTution();
     navigate('/tuition'); // Điều hướng người dùng quay lại trang chủ ('/')
   };
 
   const updateTution = async () => {
     try {
       let data = {
-        userId: iduidUser,
+        userId: idUser,
+        userIdsender: idsender,
         status1: true,
         method: "CC"
       };

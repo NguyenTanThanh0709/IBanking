@@ -44,18 +44,19 @@ app.use('/api/history', history);
 
 app.post('/pay', (req, res) => {
     const data = req.body;
-    // console.log('Received data:', data);
-    const money = (data.amount / 23000).toFixed(2);
-    // orderId + "_" + mssv + "_" + _id + "_" + mssv1 + "_" + email + "_" + idTuition + "_" + idUser;
-    const vnp_OrderInfo = "hihi" + "_" + data.mssv + "_" + data.id + "_" + data.mssv1 + "_" + data.email + "_" + data.idTuition + "_" + data.idUser;
-    console.log(money);
+    // console.log('Received data:', data);    
+    const money = (data.amount / 23000).toFixed(2).toString();
+    // // orderId + "_" + mssv + "_" + _id + "_" + mssv1 + "_" + email + "_" + idTuition + "_" + idUser;
+    const vnp_OrderInfo = 'hihi'+ "_" + data.mssv + "_" + data.idUser + "_" + data.idTuition + "_" + data.email + "_" + data.mssv1 + "_"+ data.idsender + "_" + data.start + "_" + data.end;
+    // console.log(money);
+    console.log(req.body);  
     const create_payment_json = {
         "intent": "sale",
         "payer": {
             "payment_method": "paypal"
         },
         "redirect_urls": {
-            "return_url": "http://localhost:3000/payment/result?vnp_ResponseCode=00&vnp_TransactionStatus=00&vnp_OrderInfo=" + vnp_OrderInfo,
+            "return_url": "http://localhost:5001/success?money=" + money+"&vnp_OrderInfo=" + vnp_OrderInfo,
             "cancel_url": "http://localhost:3000/payment/result?vnp_ResponseCode=01&vnp_TransactionStatus=01&vnp_OrderInfo=" + vnp_OrderInfo
         },
         "transactions": [{
@@ -63,16 +64,16 @@ app.post('/pay', (req, res) => {
                 "items": [{
                     "name": "Học phí",
                     "sku": "001",
-                    "price": money.toString(),
+                    "price": money,
                     "currency": "USD",
                     "quantity": 1
                 }]
             },
             "amount": {
                 "currency": "USD",
-                "total": money.toString()
+                "total": money
             },
-            "description": "Thanh toán học phí"
+            "description": "Thanh toán học phí từ " + data.mssv1 + " đến " + data.mssv + " từ " + data.start + " đến " + data.end
         }]
     };
 
@@ -82,15 +83,42 @@ app.post('/pay', (req, res) => {
         } else {
             for (let i = 0; i < payment.links.length; i++) {
                 if (payment.links[i].rel === 'approval_url') {
-                    console.log('Redirect user to this url:', payment.links[i].href);
-                //    return res.redirect(payment.links[i].href);
-                return res.json({link : payment.links[i].href})
+                    return res.json({link : payment.links[i].href})
                 }
             }
 
         }
     });
 
+
+});
+
+
+app.get('/success', (req, res) => {
+
+    const payerId = req.query.PayerID;
+    const paymentId = req.query.paymentId;
+    const money = req.query.money;
+    const vnp_OrderInfo = req.query.vnp_OrderInfo;
+
+    const execute_payment_json = {
+        "payer_id": payerId,
+        "transactions": [{
+            "amount": {
+                "currency": "USD",
+                "total": money
+            }
+        }]
+    };
+    paypal.payment.execute(paymentId, execute_payment_json, function(error, payment) {
+        if (error) {
+            console.log(error.response);
+            throw error;
+        } else {
+            console.log(JSON.stringify(payment));
+            res.redirect("http://localhost:3000/payment/result?vnp_ResponseCode=00&vnp_TransactionStatus=00&vnp_OrderInfo=" + vnp_OrderInfo);
+        }
+    });
 });
 
 

@@ -31,8 +31,11 @@ const API = {
         const url = `http://localhost:5001/api/history/${id}`;
         return axiosClient.put(url,body);
     }
-    ,fetchEmailSuccess : (body) => {
+    ,   fetchEmailSuccess : (body) => {
         const url = `http://localhost:5001/api/otp/getsuccess`;
+        return axiosClient.post(url,body);
+    },fecthCreateHistoryPayment : (body) => {
+        const url = `http://localhost:5001/api/history`;
         return axiosClient.post(url,body);
     }
 }
