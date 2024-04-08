@@ -58,10 +58,18 @@ export default function CodeTuitionItem(props) {
   const [loading, setLoading] = useState(false);
 
   const openOTP = async () => {
-   
-    let data_ = { email: data[0].user.email }
+
+
+    const userExists = await checkUser(data[0].user.mssv);
+    const userExists_ = await checkUser(loginState.data.mssv);
+    console.log(userExists, userExists_);
+
+    if(!userExists && !userExists_){
+      let data_ = { email: data[0].user.email }
     console.log(  data_)
     try {
+    handleClickaddUser();
+
       let data1 = await API.fetchOtpWithToken(data_);
       console.log(data1)
     if(data1){
@@ -75,13 +83,27 @@ export default function CodeTuitionItem(props) {
       alert("Mã OTP không thể gửi đến email của bạn")
       
     }   
+    }else{
+      alert("SINH VIÊN NÀY ĐANG TRONG QUÁ TRÌNH THANH TOÁN, VUI LÒNG QUAY LẠI SAU!")
+    }
+   
+    
   }
 
   const openOTP_ = async () => {
+
+    const userExists = await checkUser(data[0].user.mssv);
+    const userExists_ = await checkUser(loginState.data.mssv);
+
+    console.log(userExists, userExists_);
+
+    if(!userExists && !userExists_){
    
     let data_ = { email: data[0].user.email }
     console.log(  data_)
     try {
+    handleClickaddUser();
+
       let data1 = await API.fetchOtpWithToken(data_);
       console.log(data1)
     if(data1){
@@ -95,6 +117,9 @@ export default function CodeTuitionItem(props) {
       alert("Mã OTP không thể gửi đến email của bạn")
       
     }   
+  }else{
+    alert("SINH VIÊN NÀY ĐANG TRONG QUÁ TRÌNH THANH TOÁN, VUI LÒNG QUAY LẠI SAU!")
+  }
   }
 
   const offOTP = () => {
@@ -128,6 +153,15 @@ export default function CodeTuitionItem(props) {
     
 };
 
+
+const handleClickremoveUser = () =>{
+  socket.emit("removeUser", data[0].user.mssv);
+  socket.emit("removeUser", loginState.data.mssv);
+  socket.on("removeUsers", (users) => {
+    console.log(users)
+  });
+}
+
 const [seconds, setSeconds] = useState(60);
 const [isRunning, setIsRunning] = useState(false);
   useEffect(() => {
@@ -139,6 +173,9 @@ const [isRunning, setIsRunning] = useState(false);
         }
       }, 1000);
     }
+    if (seconds === 1) {
+      handleClickremoveUser();
+    }
 
     return () => clearInterval(intervalId);
   }, [seconds, isRunning]);
@@ -149,12 +186,6 @@ const [isRunning, setIsRunning] = useState(false);
 
 
   const handlePayment = async () => { 
-
-    const userExists = await checkUser(data[0].user.mssv);
-    const userExists_ = await checkUser(loginState.data.mssv);
-
-    if(!userExists && !userExists_){
-      handleClickaddUser();
       try {
 
         const token = loginState.data.token;
@@ -203,9 +234,6 @@ const [isRunning, setIsRunning] = useState(false);
       } catch (error) {
           console.error('Error handling payment:', error);
       }
-    }else{
-      alert("SINH VIÊN NÀY ĐANG TRONG QUÁ TRÌNH THANH TOÁN, VUI LÒNG QUAY LẠI SAU!")
-    }
 
 
     

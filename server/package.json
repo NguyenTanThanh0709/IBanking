@@ -24,8 +24,8 @@
     "mongoose": "^8.1.0",
     "morgan": "^1.10.0",
     "nodemon": "^3.0.3",
-    "paypal-rest-sdk": "^1.8.1",
     "react-router-transition-switch": "^1.2.1",
+    "paypal-rest-sdk": "^1.8.1",
     "sha256": "^0.2.0",
     "socket.io": "^4.7.4"
   },

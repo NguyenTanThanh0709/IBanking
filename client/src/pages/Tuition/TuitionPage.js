@@ -203,7 +203,7 @@ export default function TuitionPage() {
                 value={selectedYear} // Giá trị được chọn trong dropdown
                 onChange={handleYearChange} // Xử lý sự kiện khi lựa chọn thay đổi
               >
-                <option >--Chọn năm học | Choose school year--</option>
+                <option  >--Chọn năm học | Choose school year--</option>
                 {dateRanges.map((range, index) => (
                   <option key={index} value={range}>
                     {range}

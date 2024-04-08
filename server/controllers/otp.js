@@ -76,34 +76,57 @@ const sendEmailCreateOrderSuccess = async (req, res) => {
 
 const OTPSend = async (req, res) => {
     const { email } = req.body;
-    const otp = OTP.generate(6, {
-        digits: true,
-        lowerCaseAlphabets: true,
-        upperCaseAlphabets: false,
-        specialChars: false ,
-    })
-    const salt = await bcrypt.genSalt(10);
-    const hhOtp = await bcrypt.hash(otp, salt);
-let generatedOtp = '';
-for (let i = 0; i < 6; i++) {
-    const charIndex = Math.floor(Math.random() * hhOtp.length);
-    const charAscii = hhOtp.charCodeAt(charIndex); // Lấy mã ASCII của ký tự
-    const num = parseInt(charAscii); // Chuyển mã ASCII thành số
-    generatedOtp += num.toString().charAt(0); // Lấy chữ số đầu tiên của số
-}
-    
 
-    console.log(generatedOtp)
-    const  hashOtp = generatedOtp
-    const OTPMODEL = new OtpModel({email,hashOtp});
-    const otpresult = await OTPMODEL.save();
-    await sendEmailCreateOrder(email,hashOtp)
-    if(otpresult){
-        res.json(otpresult);
-    }else{
-        res.status(500).json({message:"Error"})
+    let otp;
+    let hashOtp;
+
+    // Loop until a unique OTP is generated
+    do {
+        otp = OTP.generate(6, {
+            digits: true,
+            lowerCaseAlphabets: true,
+            upperCaseAlphabets: false,
+            specialChars: false,
+        });
+
+        const salt = await bcrypt.genSalt(10);
+        const hashedOtp = await bcrypt.hash(otp, salt);
+
+        hashOtp = '';
+        for (let i = 0; i < 6; i++) {
+            const charIndex = Math.floor(Math.random() * hashedOtp.length);
+            const charAscii = hashedOtp.charCodeAt(charIndex);
+            const num = parseInt(charAscii);
+            hashOtp += num.toString().charAt(0);
+        }
+
+        // Check if the generated OTP already exists in the database
+        const existingOTP = await OtpModel.findOne({ email, hashOtp });
+        if (existingOTP) {
+            // If OTP exists, continue the loop to generate a new one
+            continue;
+        }
+
+        // If OTP doesn't exist, break the loop
+        break;
+    } while (true);
+
+    console.log(hashOtp);
+
+    // Save the OTP to the database
+    const OTPMODEL = new OtpModel({ email, hashOtp });
+    const otpResult = await OTPMODEL.save();
+
+    // Send the OTP via email
+    await sendEmailCreateOrder(email, hashOtp);
+
+    if (otpResult) {
+        res.json(otpResult);
+    } else {
+        res.status(500).json({ message: "Error" });
     }
-}
+};
+
 
 const getOtpModelByOtp = async (req, res) => {
     try {

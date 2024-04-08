@@ -5,6 +5,7 @@ export default function TuitionItem({ tuition, transaction }) {
   //console.log(data)
   const tuitionDataExists = tuition && tuition.length > 0;
   const listHistoryTransactions = transaction && transaction.length > 0;
+  console.log(tuitionDataExists);
   return (
     <Container fluid={true}>
         <Row>

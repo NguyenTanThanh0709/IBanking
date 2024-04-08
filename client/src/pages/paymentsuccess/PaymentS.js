@@ -43,12 +43,37 @@ function PaymentS() {
           setShowSuccessIcon(false);
           setShowFailedIcon(true);
       }
+      if(vnp_ResponseCode === '00' && vnp_TransactionStatus === '00') {
+        // xử lý data base thanh toán thành công ngày giờ
+        updateTution();
+        let mailSuccess = {
+          mssv: mssv,
+          start: start,
+          end: end,
+          money: money,
+          result: "THÀNH CÔNG",
+          email: email,
+        }
+        sendEmailCreateOrderSuccess(mailSuccess);
+      }else{
+        let mailSuccess = {
+          mssv: mssv,
+          start: start,
+          end: end,
+          money: money,
+          result: "THẤT BẠI",
+          email: email,
+        }
+        sendEmailCreateOrderSuccess(mailSuccess);
+        
+      }
   }, [vnp_ResponseCode, vnp_TransactionStatus]);
 
 
     const [socket, setSocket] = useState(null)
     useEffect(() => {
       setSocket(io("ws://localhost:8900"));
+
     }, []);
 
     const handleClickremoveUser = () =>{
@@ -61,30 +86,6 @@ function PaymentS() {
 
   const handleGoBack = () => {
     // Hàm xử lý khi nút "GO BACK" được nhấp
-    if(vnp_ResponseCode === '00' && vnp_TransactionStatus === '00') {
-      // xử lý data base thanh toán thành công ngày giờ
-      updateTution();
-      let mailSuccess = {
-        mssv: mssv,
-        start: start,
-        end: end,
-        money: money,
-        result: "THÀNH CÔNG",
-        email: email,
-      }
-      sendEmailCreateOrderSuccess(mailSuccess);
-    }else{
-      let mailSuccess = {
-        mssv: mssv,
-        start: start,
-        end: end,
-        money: money,
-        result: "THẤT BẠI",
-        email: email,
-      }
-      sendEmailCreateOrderSuccess(mailSuccess);
-      
-    }
     handleClickremoveUser();
     navigate('/tuition'); // Điều hướng người dùng quay lại trang chủ ('/')
   };
